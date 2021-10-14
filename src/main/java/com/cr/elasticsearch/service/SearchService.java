@@ -3,6 +3,7 @@ package com.cr.elasticsearch.service;
 import com.alibaba.fastjson.JSON;
 import com.cr.elasticsearch.entity.Goods;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequestBuilder;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -36,7 +37,10 @@ public class SearchService {
 
         SearchRequest request = new SearchRequest(GOODS_INDEX);
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder();
-        sourceBuilder.query(QueryBuilders.termQuery("name", keyword));
+
+        MatchQueryBuilder matchQuery = QueryBuilders.matchQuery("name", keyword).analyzer("ik_smart");
+        sourceBuilder.query(matchQuery);
+
         HighlightBuilder highlightBuilder = new HighlightBuilder();
         highlightBuilder.field("name");
         highlightBuilder.preTags("<em>");
@@ -62,7 +66,13 @@ public class SearchService {
                 if (key.equals("name")) {
                     goods.setName(highlightFields.get("name").fragments()[0].string());
                 }else if(key.equals("goodsId")){
-                    goods.setGoodsId((Long) entry.getValue());
+                    Long goodsId = null;
+                    if(entry.getValue() instanceof Integer){
+                        goodsId = ((Integer) entry.getValue()).longValue();
+                    }else if(entry.getValue() instanceof Long){
+                        goodsId = (Long) entry.getValue();
+                    }
+                    goods.setGoodsId(goodsId);
                 }else if(key.equals("price")){
                     goods.setPrice((Double) entry.getValue());
                 }else if(key.equals("img")){
