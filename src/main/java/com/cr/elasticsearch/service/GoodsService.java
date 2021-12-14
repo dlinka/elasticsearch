@@ -23,11 +23,13 @@ import java.util.List;
 import java.util.Map;
 
 import static com.cr.elasticsearch.constant.ESIndexConstant.GOODS_INDEX;
-import static com.cr.elasticsearch.constant.ESIndexConstant.USER_INDEX;
 
+/**
+ * 使用RestHighLevelClient操作ES
+ */
 @Slf4j
 @Service
-public class SearchService {
+public class GoodsService {
 
     @Autowired
     RestHighLevelClient restHighLevelClient;
